@@ -139,6 +139,9 @@ public class CountDownLatch2 {
         return sync.getCount();
     }
 
+    /**
+     * 比原生{@link java.util.concurrent.CountDownLatch}增加的方法
+     */
     public void reset() {
         sync.reset();
     }
@@ -161,6 +164,9 @@ public class CountDownLatch2 {
     private static final class Sync extends AbstractQueuedSynchronizer {
         private static final long serialVersionUID = 4982264981922014374L;
 
+        /**
+         * 比原生Sync多的属性
+         */
         private final int startCount;
 
         Sync(int count) {
@@ -187,7 +193,7 @@ public class CountDownLatch2 {
                     return nextc == 0;
             }
         }
-
+        //比原生Sync增加的方法
         protected void reset() {
             setState(startCount);
         }

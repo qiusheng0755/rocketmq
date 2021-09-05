@@ -25,10 +25,35 @@ import java.util.Map;
 public class Message implements Serializable {
     private static final long serialVersionUID = 8445773977080406428L;
 
+    /**
+     * 话题
+     */
     private String topic;
+
+    /**
+     * 网络通信层标记
+     */
     private int flag;
+
+    /**
+     * MIN_OFFSET：最小偏移
+     * MAX_OFFSET：最大偏移
+     * CONSUME_START_TIME：消费拉取时间
+     * UNIQ_KEY：
+     * CLUSTER：集群
+     * WAIT：
+     * TAGS：消息标签
+     */
     private Map<String, String> properties;
+
+    /**
+     * Producer发送的实际消息内容，以字节数组（ASCII码）形式进行存储。Message消息有一定大小限制
+     */
     private byte[] body;
+
+    /**
+     * 事务消息相关的事务编号
+     */
     private String transactionId;
 
     public Message() {

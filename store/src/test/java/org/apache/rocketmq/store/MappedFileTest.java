@@ -20,12 +20,9 @@
  */
 package org.apache.rocketmq.store;
 
-import java.io.File;
-import java.io.IOException;
-
-import org.apache.rocketmq.common.UtilAll;
-import org.junit.After;
 import org.junit.Test;
+
+import java.io.IOException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -34,7 +31,8 @@ public class MappedFileTest {
 
     @Test
     public void testSelectMappedBuffer() throws IOException {
-        MappedFile mappedFile = new MappedFile("target/unit_test_store/MappedFileTest/000", 1024 * 64);
+//        MappedFile mappedFile = new MappedFile("target/unit_test_store/MappedFileTest/000", 1024 * 64);
+        MappedFile mappedFile = new MappedFile("D:\\Workspaces\\OpenSource\\rocketmq-4.7.1\\store\\target\\unit_test_store\\MappedFileTest\\000", 1024 * 64);
         boolean result = mappedFile.appendMessage(storeMessage.getBytes());
         assertThat(result).isTrue();
 
@@ -52,9 +50,9 @@ public class MappedFileTest {
         assertThat(mappedFile.destroy(1000)).isTrue();
     }
 
-    @After
-    public void destory() {
-        File file = new File("target/unit_test_store");
-        UtilAll.deleteFile(file);
-    }
+//    @After
+//    public void destory() {
+//        File file = new File("target/unit_test_store");
+//        UtilAll.deleteFile(file);
+//    }
 }

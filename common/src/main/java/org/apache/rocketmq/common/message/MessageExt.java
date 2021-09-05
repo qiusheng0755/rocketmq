@@ -16,34 +16,35 @@
  */
 package org.apache.rocketmq.common.message;
 
+import org.apache.rocketmq.common.TopicFilterType;
+import org.apache.rocketmq.common.sysflag.MessageSysFlag;
+
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
-import org.apache.rocketmq.common.TopicFilterType;
-import org.apache.rocketmq.common.sysflag.MessageSysFlag;
 
 public class MessageExt extends Message {
     private static final long serialVersionUID = 5720810158625748049L;
 
-    private String brokerName;
+    private String brokerName;  //broker名称
 
-    private int queueId;
+    private int queueId;    //记录MessageQueue编号，消息在Topic下对应的MessageQueue中被拉取
 
-    private int storeSize;
+    private int storeSize;  //记录消息在Broker存盘大小
 
-    private long queueOffset;
-    private int sysFlag;
-    private long bornTimestamp;
-    private SocketAddress bornHost;
+    private long queueOffset;   //记录在ConsumeQueue中的偏移
+    private int sysFlag;    //记录一些系统标志的开关状态，MessageSysFlag中定义了系统标识
+    private long bornTimestamp; //消息创建时间，在Producer发送消息时设置
+    private SocketAddress bornHost; //记录发送改消息的producer地址
 
-    private long storeTimestamp;
-    private SocketAddress storeHost;
-    private String msgId;
-    private long commitLogOffset;
-    private int bodyCRC;
-    private int reconsumeTimes;
+    private long storeTimestamp;    //消息存储时间
+    private SocketAddress storeHost;    //记录存储该消息的Broker地址
+    private String msgId;   //消息Id
+    private long commitLogOffset;   //记录消息在Broker中存储偏移
+    private int bodyCRC;    //消息内容CRC校验值
+    private int reconsumeTimes; //消息重试消费次数
 
     private long preparedTransactionOffset;
 
