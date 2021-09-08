@@ -16,20 +16,23 @@
  */
 package org.apache.rocketmq.store.config;
 
-import java.io.File;
 import org.apache.rocketmq.common.annotation.ImportantField;
 import org.apache.rocketmq.store.ConsumeQueue;
+
+import java.io.File;
 
 public class MessageStoreConfig {
     //The root directory in which the log data is kept
     @ImportantField
     private String storePathRootDir = System.getProperty("user.home") + File.separator + "store";
 
+    //commitlog 文件夹路径{user.home}/store/commitlog
     //The directory in which the commitlog is kept
     @ImportantField
     private String storePathCommitLog = System.getProperty("user.home") + File.separator + "store"
         + File.separator + "commitlog";
 
+    // CommitLog文件大小，默认1G
     // CommitLog file size,default is 1G
     private int mappedFileSizeCommitLog = 1024 * 1024 * 1024;
     // ConsumeQueue file size,default is 30W
@@ -58,6 +61,7 @@ public class MessageStoreConfig {
      */
     private boolean useReentrantLockWhenPutMessage = false;
 
+    // 是否定时刷盘,默认为实时刷盘
     // Whether schedule flush,default is real-time
     @ImportantField
     private boolean flushCommitLogTimed = false;
@@ -86,6 +90,8 @@ public class MessageStoreConfig {
     // This ensures no on-the-wire or on-disk corruption to the messages occurred.
     // This check adds some overhead,so it may be disabled in cases seeking extreme performance.
     private boolean checkCRCOnRecover = true;
+
+    // 默认刷盘页数，默认4
     // How many pages are to be flushed when flush CommitLog
     private int flushCommitLogLeastPages = 4;
     // How many pages are to be committed when commit data to file
@@ -94,6 +100,9 @@ public class MessageStoreConfig {
     private int flushLeastPagesWhenWarmMapedFile = 1024 / 4 * 16;
     // How many pages are to be flushed when flush ConsumeQueue
     private int flushConsumeQueueLeastPages = 2;
+    /**
+     * 间隔10秒未刷盘，会强制刷盘
+     */
     private int flushCommitLogThoroughInterval = 1000 * 10;
     private int commitCommitLogThoroughInterval = 200;
     private int flushConsumeQueueThoroughInterval = 1000 * 60;
@@ -609,9 +618,10 @@ public class MessageStoreConfig {
     }
 
     /**
+     * 只有broker主节点，配置为异步刷盘的情况下，才有可能会使用writeBuffer
+     *
      * Enable transient commitLog store pool only if transientStorePoolEnable is true and the FlushDiskType is
      * ASYNC_FLUSH
-     *
      * @return <tt>true</tt> or <tt>false</tt>
      */
     public boolean isTransientStorePoolEnable() {

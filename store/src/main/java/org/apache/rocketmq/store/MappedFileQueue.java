@@ -16,18 +16,15 @@
  */
 package org.apache.rocketmq.store;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
-import java.util.ListIterator;
-import java.util.concurrent.CopyOnWriteArrayList;
 import org.apache.rocketmq.common.UtilAll;
 import org.apache.rocketmq.common.constant.LoggerName;
 import org.apache.rocketmq.logging.InternalLogger;
 import org.apache.rocketmq.logging.InternalLoggerFactory;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class MappedFileQueue {
     private static final InternalLogger log = InternalLoggerFactory.getLogger(LoggerName.STORE_LOGGER_NAME);
@@ -48,6 +45,11 @@ public class MappedFileQueue {
 
     private volatile long storeTimestamp = 0;
 
+    /**
+     * @param storePath  commitlog 文件夹路径{user.home}/store/commitlog
+     * @param mappedFileSize CommitLog文件大小，默认1G
+     * @param allocateMappedFileService
+     */
     public MappedFileQueue(final String storePath, int mappedFileSize,
         AllocateMappedFileService allocateMappedFileService) {
         this.storePath = storePath;
@@ -422,12 +424,17 @@ public class MappedFileQueue {
         return deleteCount;
     }
 
+    /**
+     * mappedFile.flush(0);保证立刻刷盘后面异步刷盘时也会调用mappedFile.flush()方法
+     */
     public boolean flush(final int flushLeastPages) {
         boolean result = true;
         MappedFile mappedFile = this.findMappedFileByOffset(this.flushedWhere, this.flushedWhere == 0);
         if (mappedFile != null) {
             long tmpTimeStamp = mappedFile.getStoreTimestamp();
+            //刷盘，返回刷写到磁盘指针
             int offset = mappedFile.flush(flushLeastPages);
+            //计算当前的刷盘指针，之前的所有数据已经持久化到磁盘中
             long where = mappedFile.getFileFromOffset() + offset;
             result = where == this.flushedWhere;
             this.flushedWhere = where;

@@ -70,7 +70,7 @@ public class MappedFile extends ReferenceResource {
     protected final AtomicInteger committedPosition = new AtomicInteger(0);
 
     /**
-     * 当前刷写到磁盘的指针
+     * 当前刷盘的指针
      */
     private final AtomicInteger flushedPosition = new AtomicInteger(0);
 
@@ -343,7 +343,7 @@ public class MappedFile extends ReferenceResource {
                 } catch (Throwable e) {
                     log.error("Error occurred when force data to disk.", e);
                 }
-
+                //设置刷盘后的指针
                 this.flushedPosition.set(value);
                 this.release();
             } else {
@@ -359,6 +359,7 @@ public class MappedFile extends ReferenceResource {
             //no need to commit data to file channel, so just regard wrotePosition as committedPosition.
             return this.wrotePosition.get();
         }
+        //如果提交的数据不满commitLeastPages则不执行本次的提交，待下一次提交
         if (this.isAbleToCommit(commitLeastPages)) {
             if (this.hold()) {
                 commit0(commitLeastPages);
@@ -383,11 +384,16 @@ public class MappedFile extends ReferenceResource {
 
         if (writePos - this.committedPosition.get() > 0) {
             try {
+                //创建writeBuffer的共享缓存区
                 ByteBuffer byteBuffer = writeBuffer.slice();
+                //将指针回退到上一次提交的位置
                 byteBuffer.position(lastCommittedPosition);
+                //设置limit为writePos
                 byteBuffer.limit(writePos);
                 this.fileChannel.position(lastCommittedPosition);
+                //将committedPosition指针到writePosition的数据复制（写入）到fileChannel中
                 this.fileChannel.write(byteBuffer);
+                //更新committedPosition指针为writePos
                 this.committedPosition.set(writePos);
             } catch (Throwable e) {
                 log.error("Error occurred when commit data to FileChannel.", e);
@@ -395,8 +401,13 @@ public class MappedFile extends ReferenceResource {
         }
     }
 
+    /**
+     * 判断是否需要刷盘
+     * 同步刷盘时flushLeastPages=0立刻刷盘；
+     * 异步刷盘时flushLeastPages=4 ,默认是4，需要刷盘的数据达到PageCache的页数4倍时才会刷盘，或者距上一次刷盘时间>=200ms则设置flushLeastPages=0立刻刷盘
+     */
     private boolean isAbleToFlush(final int flushLeastPages) {
-        int flush = this.flushedPosition.get();
+        int flush = this.flushedPosition.get(); //当前刷写到磁盘的指针
         int write = getReadPosition();
 
         if (this.isFull()) {
